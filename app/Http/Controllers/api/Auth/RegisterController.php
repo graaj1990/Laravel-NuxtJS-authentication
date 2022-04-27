@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\api\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
@@ -8,6 +8,9 @@ use App\Models\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class RegisterController extends Controller
 {
@@ -29,16 +32,42 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = RouteServiceProvider::HOME;
+    protected $redirectTo = '';//RouteServiceProvider::HOME;
+
+    protected $auth;
 
     /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(JWTAuth $auth)
     {
-        $this->middleware('guest');
+        //$this->middleware('guest');
+        $this->auth = $auth;
+    }
+
+    public function register(Request $request)
+    {
+        $validator = $this->validator($request->all());        
+
+        if (!$validator->fails()) { 
+            $user = $this->create($request->all());
+
+            $token = $this->auth->attempt( $request->only('email','password'));
+
+
+            return response()->json([
+                'success'=>true,
+                'date'=>$user,
+                'token'=>$token,
+            ]);
+        }
+
+        return response()->json([
+            'success'=>false,
+            'errors'=>$validator->errors()
+        ]);
     }
 
     /**
