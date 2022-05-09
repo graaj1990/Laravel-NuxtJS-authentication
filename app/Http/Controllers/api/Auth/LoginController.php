@@ -80,14 +80,14 @@ class LoginController extends Controller
                 return response()->json([
                     'success'=>false,
                     'errors'=>['Invalid email address or password']
-                ]);
+                ],401);
             }
         }
         catch(JWTException $e){
             return response()->json([
                 'success'=>false,
                 'errors'=>['Invalid email address or password']
-            ]);
+            ],401);
         }
 
         return response()->json([
